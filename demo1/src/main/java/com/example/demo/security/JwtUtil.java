@@ -47,11 +47,11 @@ public class JwtUtil {
         claims.put("lastName", user.getLastName());
 
         return Jwts.builder()
-                .setClaims(claims)
                 .setSubject(user.getEmail())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours token validity
-                .signWith(SignatureAlgorithm.HS256, secret)
+                .claim("userId", user.getId())  // Add this line
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
+                .signWith(SignatureAlgorithm.HS512, secret)
                 .compact();
     }
 

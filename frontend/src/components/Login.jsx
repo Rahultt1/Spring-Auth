@@ -25,15 +25,18 @@ const Login = () => {
         e.preventDefault();
         try {
             const response = await axios.post('http://localhost:8080/api/auth/login', { email, password });
-            localStorage.setItem('token', response.data.token);
-            // Decode the JWT to get user information
-            const decodedToken = JSON.parse(atob(response.data.token.split('.')[1]));
-            localStorage.setItem('email', decodedToken.email);
-            localStorage.setItem('firstName', decodedToken.firstName || '');
-            localStorage.setItem('lastName', decodedToken.lastName || '');
+            const { token, userId, email: userEmail, firstName, lastName } = response.data;
+
+            localStorage.setItem('token', token);
+            localStorage.setItem('userId', userId);
+            localStorage.setItem('email', userEmail);
+            localStorage.setItem('firstName', firstName);
+            localStorage.setItem('lastName', lastName);
+
             navigate('/dashboard');
         } catch (error) {
             console.error('Login failed', error.response ? error.response.data : error.message);
+            alert('Login failed. Please check your credentials.');
         }
     };
 
@@ -43,6 +46,7 @@ const Login = () => {
                 token: credentialResponse.credential
             });
             localStorage.setItem('token', response.data.token);
+            localStorage.setItem('userId', response.data.userId); // Add this line
             localStorage.setItem('firstName', response.data.firstName);
             localStorage.setItem('lastName', response.data.lastName);
             localStorage.setItem('email', response.data.email);
