@@ -43,7 +43,8 @@ public class JwtUtil {
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("email", user.getEmail());
-        // Add any other claims you want
+        claims.put("firstName", user.getFirstName());
+        claims.put("lastName", user.getLastName());
 
         return Jwts.builder()
                 .setClaims(claims)

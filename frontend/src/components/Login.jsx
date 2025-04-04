@@ -9,25 +9,43 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
 
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+    //     try {
+    //         const response = await axios.post('http://localhost:8080/api/auth/login', { email, password });
+    //         localStorage.setItem('token', response.data.token);
+    //         navigate('/dashboard');
+    //     } catch (error) {
+    //         console.error('Login failed', error);
+    //     }
+    // };
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const response = await axios.post('http://localhost:8080/api/auth/login', { email, password });
             localStorage.setItem('token', response.data.token);
+            // Decode the JWT to get user information
+            const decodedToken = JSON.parse(atob(response.data.token.split('.')[1]));
+            localStorage.setItem('email', decodedToken.email);
+            localStorage.setItem('firstName', decodedToken.firstName || '');
+            localStorage.setItem('lastName', decodedToken.lastName || '');
             navigate('/dashboard');
         } catch (error) {
-            console.error('Login failed', error);
+            console.error('Login failed', error.response ? error.response.data : error.message);
         }
     };
 
     const handleGoogleSuccess = async (credentialResponse) => {
-        console.log('Google login response:', credentialResponse);
         try {
             const response = await axios.post('http://localhost:8080/api/auth/google-login', {
                 token: credentialResponse.credential
             });
-            console.log('Backend response:', response.data);
             localStorage.setItem('token', response.data.token);
+            localStorage.setItem('firstName', response.data.firstName);
+            localStorage.setItem('lastName', response.data.lastName);
+            localStorage.setItem('email', response.data.email);
             navigate('/dashboard');
         } catch (error) {
             console.error('Google login failed', error.response ? error.response.data : error.message);

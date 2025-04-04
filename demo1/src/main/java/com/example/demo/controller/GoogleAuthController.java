@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -42,19 +43,30 @@ public class GoogleAuthController {
                 GoogleIdToken.Payload payload = idToken.getPayload();
                 String email = payload.getEmail();
                 String name = (String) payload.get("name");
+                String firstName = (String) payload.get("given_name");
+                String lastName = (String) payload.get("family_name");
 
                 User user = userRepository.findByEmail(email);
                 if (user == null) {
                     user = new User();
                     user.setEmail(email);
-                    String[] nameParts = name.split(" ");
-                    user.setFirstName(nameParts[0]);
-                    user.setLastName(nameParts.length > 1 ? nameParts[1] : "");
+                    user.setFirstName(firstName);
+                    user.setLastName(lastName);
+                    userRepository.save(user);
+                } else {
+                    // Update name if it has changed
+                    user.setFirstName(firstName);
+                    user.setLastName(lastName);
                     userRepository.save(user);
                 }
 
                 String jwt = jwtUtil.generateToken(user);
-                return ResponseEntity.ok(Map.of("token", jwt));
+                Map<String, Object> response = new HashMap<>();
+                response.put("token", jwt);
+                response.put("firstName", user.getFirstName());
+                response.put("lastName", user.getLastName());
+                response.put("email", user.getEmail());
+                return ResponseEntity.ok(response);
             } else {
                 return ResponseEntity.badRequest().body("Invalid ID token.");
             }
