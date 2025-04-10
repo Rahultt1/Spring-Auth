@@ -21,20 +21,18 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 public class GoogleAuthController {
 
-    @Value("${spring.security.oauth2.client.registration.google.client-id}")
-    private String clientId;
+    private final GoogleIdTokenVerifier verifier;
+
 
     @Autowired
     private UserRepository userRepository;
 
 
-    private GoogleIdTokenVerifier verifier;
-
     @Autowired
     public GoogleAuthController(@Value("${spring.security.oauth2.client.registration.google.client-id}") String clientId) {
         NetHttpTransport transport = new NetHttpTransport();
         JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-        verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+        this.verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
                 .setAudience(Collections.singletonList(clientId))
                 .build();
     }
